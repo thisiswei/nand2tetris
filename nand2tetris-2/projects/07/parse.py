@@ -5,6 +5,7 @@ _mapping = {
     'that': 'THAT',
     'temp': 'TEMP',
     'pointer': 'POINTER',
+    'static': 'STATIC',
 }
 
 
@@ -67,6 +68,16 @@ def pop_helper(parts):
             'A=M',
             'D=M',
             '@{}'.format(loc),
+            'M=D',
+        ]
+
+    if segment == 'static':
+        return [
+            '@SP',
+            'M=M-1',
+            'A=M'
+            'D=M',
+            '@StaticTest.{}'.format(i),
             'M=D',
         ]
 
@@ -152,6 +163,16 @@ def push_other_helper(parts):
             'M=M+1',
         ]
 
+    if segment == 'static':
+        return [
+            '@StaticTest.{}'.format(i),
+            'D=M',
+            '@SP',
+            'A=M',
+            'M=D',
+            '@SP',
+            'M=M+1',
+        ]
 
     if segment == 'TEMP':
         return [
@@ -625,6 +646,22 @@ xs = [
     'push this 2',
     'sub',
     'push that 6',
+    'add',
+]
+
+
+# StaticTest.vm
+xs = [
+    'push constant 111',
+    'push constant 333',
+    'push constant 888',
+    'pop static 8',
+    'pop static 3',
+    'pop static 1',
+    'push static 3',
+    'push static 1',
+    'sub',
+    'push static 8',
     'add',
 ]
 
