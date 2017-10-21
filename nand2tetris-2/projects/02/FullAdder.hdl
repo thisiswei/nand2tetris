@@ -13,5 +13,12 @@ CHIP FullAdder {
         carry;   // Left bit of a + b + c
 
     PARTS:
-    // Put you code here:
+    HalfAdder(a=b, b=c, sum=s1, carry=c1);
+    Not(in=s1, out=notS1);
+    Mux(a=s1,b=notS1,sel=a,out=sum);
+
+    /* Xor(a=s1, b=c1, out=c2); */
+    Or(a=b, b=c, out=c2);
+    Mux(a=c1,b=c2,sel=a,out=carry);
+
 }

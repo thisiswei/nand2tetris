@@ -15,6 +15,43 @@ CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
+    /* register, incrementor, other gates */
     PARTS:
-    // Put your code here:
+
+    /* DMux(in=inc, sel=load, a=incActual); */
+
+    /* Mux16(a=outTmp, b=in, sel=load, out=asIn); */
+    /* Inc16(in=asIn, out=inc16); */
+    /* Mux16(a=asIn, b=inc16, sel=incActual, out=incProcessed); */
+
+    /* /1* reset *1/ */
+    /* Mux16(a=incProcessed, b=false, sel=reset, out=out1); */
+    /* Register(in=out1, load=true, out=out, out=outTmp); */
+
+    /* bingbinglai - not working yet */
+
+    /* Inc16(in=preOut, out=incred); */
+    /* Mux16(a=incred, b=preOut, sel=load, out=loadOrInc); */
+    /* Mux16(a=loadOrInc, b=false, sel=reset, out=loadIncOrReset); */
+    /* Mux16(a=preOut, b=loadIncOrReset, sel=selOrs, out=out); */
+
+    /* Or(a=inc,b=load, out=or0); */
+    /* Or(a=or0,b=reset, out=selOrs); */
+    /* Register(in=in, load=true, out=preOut, out=registerOut); */
+
+
+    /* /1* wei changed out => outTmp *1/ */
+    /* Register(in=outTmp, load=true, out=out); */
+
+    /* wei */
+    Mux16(a=outPrev, b=in, sel=load, out=asIn);
+    Inc16(in=asIn, out=inc16);
+
+    DMux(in=inc, sel=load, a=incActual);
+    Mux16(a=asIn, b=inc16, sel=incActual, out=incProcessed);
+
+    /* reset */
+    Mux16(a=incProcessed, b=false, sel=reset, out=out1);
+    Register(in=out1, load=true, out=out, out=outPrev);
+    /* wei finished */
 }

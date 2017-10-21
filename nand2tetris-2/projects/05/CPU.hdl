@@ -15,14 +15,11 @@
  * holds the value of this location. If the current instruction needs 
  * to write a value to M, the value is placed in outM, the address 
  * of the target location is placed in the addressM output, and the 
- * writeM control bit is asserted. (When writeM==0, any value may 
- * appear in outM). The outM and writeM outputs are combinational: 
- * they are affected instantaneously by the execution of the current 
- * instruction. The addressM and pc outputs are clocked: although they 
- * are affected by the execution of the current instruction, they commit 
- * to their new values only in the next time step. If reset==1 then the 
- * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
- * than to the address resulting from executing the current instruction. 
+ * writeM control bit is asserted.
+
+ - The outM and writeM outputs are combinational: 
+ - The addressM and pc outputs are clocked
+
  */
 
 CHIP CPU {
@@ -39,5 +36,97 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // depends on the left most bit to determine load from instruction
+    // or previous output
+    Not(in=instruction[15], out=sel0);
+
+    Mux16(a=ALUOutPut,b=instruction,sel=sel0,out=ARegIn);
+
+    // A instruction sel=1
+    // C instruction depends on Dest bit of A
+    // A destination bit is on the 5th
+    Or(a=sel0, b=instruction[5], out=ARegLoad);
+    ARegister(in=ARegIn, load=ARegLoad, out=ARegOut, out[0..14]=addressM);
+
+    // a in "111 a" to determine whether to use M or A
+    Mux16(a=ARegOut, b=inM, sel=instruction[12], out=AOrM);
+
+    // have to be c instruction and D destination bit have to be on
+    // D destination bit is on the 4th
+    And(a=instruction[4], b=instruction[15], out=DControlBit);
+    DRegister(in=ALUOutPut, load=DControlBit, out=DRegOut);
+
+    // calculate ALU
+    ALU(x=DRegOut,y=AOrM, zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6], out=ALUOutPut, out=DRegister, out=outM, zr=zr,ng=ng);
+
+    // M destination bit
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // Program Counter
+    // get PCLoad
+    // zr, ng
+
+    // 000 -> 0
+    // 001 -> JGT (not zr and not ng)
+
+    // 010 -> JEQ zr and not ng
+    // 011 -> JGE zr or not ng
+
+    // 100 -> JLT not zr and ng
+    // 101 -> JNE not zr
+
+    // 110 -> JLE zr or ng
+    // 111 -> 1
+
+
+    // JNE not zr
+    Not(in=zr, out=NotZR, out=JNE);
+    Not(in=ng, out=NotNG);
+
+    // JGT (not zr and not ng)
+    And(a=NotZR, b=NotNG, out=JGT);
+
+    // JEQ zr and not ng
+    And(a=zr, b=NotNG, out=JEQ);
+
+    // JGE zr or not ng
+    Or(a=zr, b=NotNG, out=JGE);
+
+    // JLT not zr and ng
+    And(a=NotZR, b=ng, out=JLT);
+
+    // JLE zr or ng
+    Or(a=zr, b=ng, out=JLE);
+
+
+    // 0 -> 0,JGT,JEQ,JGE
+
+       // 0 -> 0,JGT
+          // 0 -> 0
+          // 1 -> JGT
+       // 1->  JEQ,JGE
+          // 0 -> JEQ
+          // 1 -> JGE
+
+    Mux(a=false, b=JGT, sel=instruction[0], out=mux00);
+    Mux(a=JEQ, b=JGE, sel=instruction[0], out=mux01);
+    Mux(a=mux00, b=mux01, sel=instruction[1], out=mux02);
+
+    // 1 -> JLT,JNE,JLE,1
+       // 0 -> JLT, JNE
+          // 0 -> JLT
+          // 1 -> JNE
+
+       // 1 -> JLE, 1
+          // 0 -> JLE
+          // 1 -> 1
+    Mux(a=JLT, b=JNE, sel=instruction[0], out=mux10);
+    Mux(a=JLE, b=true, sel=instruction[0], out=mux11);
+    Mux(a=mux10, b=mux11, sel=instruction[1], out=mux12);
+
+    Mux(a=mux02, b=mux12, sel=instruction[2], out=PCLoad0);
+    And(a=instruction[15], b=PCLoad0, out=PCLoad);
+
+    PC(reset=reset, inc=true, load=PCLoad, in=ARegOut, out[0..14]=pc);
+
 }

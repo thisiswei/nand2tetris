@@ -27,5 +27,30 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+
+    /* use ram depends on the left most bit */
+    /* use kbd depends on the left most and second left most bit */
+    Not(in=address[14], out=useRAM);
+    And(a=address[14], b=address[13], out=useKBD);
+
+    /* use screen only if not use kbd and not use RAM */
+    Not(in=useKBD, out=notUseKBD);
+    Not(in=useRAM, out=notUseRAM);
+    And(a=notUseRAM, b=notUseRAM, out=useScreen);
+
+    /* use ram only if the load is asserted */
+    And(a=load, b=useRAM, out=useRAM4Real);
+    RAM16K(in=in, load=useRAM4Real, address=address[0..13], out=RAMOut);
+
+    /* use screen only if the load is asserted */
+    And(a=load, b=useScreen, out=useScreen4Real);
+    Screen(in=in, load=useScreen4Real, address=address[0..12], out=SCreenOut);
+    Keyboard(out=KBDOut);
+
+    /* choose screen or kbd base on usekbd */
+    Mux16(a=SCreenOut, b=KBDOut, sel=useKBD, out=SKOUT);
+
+    /* choose RAM or (screen or kbd) base on left most bit */
+    Mux16(a=RAMOut, b=SKOUT, sel=address[14], out=out);
+
 }

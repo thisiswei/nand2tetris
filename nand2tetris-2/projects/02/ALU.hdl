@@ -16,12 +16,17 @@
 
 // Implementation: the ALU logic manipulates the x and y inputs
 // and operates on the resulting values, as follows:
+
 // if (zx == 1) set x = 0        // 16-bit constant
-// if (nx == 1) set x = !x       // bitwise not
 // if (zy == 1) set y = 0        // 16-bit constant
+
+// if (nx == 1) set x = !x       // bitwise not
 // if (ny == 1) set y = !y       // bitwise not
+
+
 // if (f == 1)  set out = x + y  // integer 2's complement addition
 // if (f == 0)  set out = x & y  // bitwise and
+
 // if (no == 1) set out = !out   // bitwise not
 // if (out == 0) set zr = 1
 // if (out < 0) set ng = 1
@@ -42,5 +47,46 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+
+    /* get zeros */
+    Not16(in=x, out=NotX);
+    And16(a=x, b=NotX, out=zeros);
+    Not16(in=zeros, out=ones);
+
+
+    /* // if (zx == 1) set x = 0        // 16-bit constant */
+    /* // if (zy == 1) set y = 0        // 16-bit constant */
+    Mux16(a=x,b=zeros,sel=zx, out=x0);
+    Mux16(a=y,b=zeros,sel=zy, out=y0);
+
+    /* // if (nx == 1) set x = !x       // bitwise not */
+    /* // if (ny == 1) set y = !y       // bitwise not */
+    Not16(in=x0, out=negateX);
+    Not16(in=y0, out=negateY);
+    Mux16(a=x0,b=negateX,sel=nx, out=x1);
+    Mux16(a=y0,b=negateY,sel=ny, out=y1);
+
+    /* // if (f == 1)  set out = x + y  // integer 2's complement addition */
+    /* // if (f == 0)  set out = x & y  // bitwise and */
+    And16(a=x1,b=y1, out=xAndy);
+
+    Add16(a=x1,b=y1, out=xAddy);
+
+    Mux16(a=xAndy, b=xAddy, sel=f, out=out1);
+
+
+    /* // if (no == 1) set out = !out   // bitwise not */
+    Not16(in=out1, out=negateOut1);
+    Mux16(a=out1,b=negateOut1,sel=no, out[0..7]=part1, out[8..15]=part2, out=out2);
+    And16(a=out2,b=ones, out[15]=ng, out=out);
+
+    /* // if (out == 0) set zr = 1 */
+
+    Or8Way(in=part1, out=orOut1);
+    Or8Way(in=part2, out=orOut2);
+    Or(a=orOut1, b=orOut2, out=orzr);
+    Not(in=orzr, out=zr);
+    /* // if (out < 0) set ng = 1 */
+
+
 }
