@@ -15,6 +15,10 @@ def parser_helper(string):
         command = parts[0]
         segment = None
         i = None
+    elif len(parts) == 2:
+        command = parts[0]
+        segment = parts[1]
+        i = None
     else:
         command = parts[0]
         segment = parts[1]
@@ -29,6 +33,12 @@ def parser_helper(string):
 
 def parser(string):
     parts = parser_helper(string)
+    if parts['command'] == 'if-goto':
+        return if_go_helper(parts)
+
+    if parts['command'] == 'label':
+        return label_helper(parts)
+
     if parts['command'] == 'push':
         return push_helper(parts)
 
@@ -52,6 +62,26 @@ def parser(string):
     }.get(command)
     if command_runner:
         return command_runner()
+
+
+def label_helper(parts):
+    return [
+        '({})'.format(parts['segment'])
+    ]
+
+
+def if_go_helper(parts):
+    '''
+    if-to LOOP_START
+    '''
+    return [
+        '@SP',
+        'M=M-1',
+        'A=M',
+        'D=M',
+        '@{}'.format(parts['segment']),
+        'D;JNE',
+    ]
 
 
 def pop_helper(parts):
@@ -664,6 +694,25 @@ xs = [
     'push static 8',
     'add',
 ]
+
+
+xs = [
+    'push constant 0',
+    'pop local 0',
+    'label LOOP_START',
+    'push argument 0',
+    'push local 0',
+    'add',
+    'pop local 0',
+    'push argument 0',
+    'push constant 1',
+    'sub',
+    'pop argument 0',
+    'push argument 0',
+    'if-goto LOOP_START',
+    'push local 0',
+]
+
 
 for x in xs:
     ret = parser(x)
