@@ -39,6 +39,12 @@ def parser(string):
     if parts['command'] == 'label':
         return label_helper(parts)
 
+    if parts['command'] == 'function':
+        return function_helper(parts)
+
+    if parts['command'] == 'return':
+        return return_helper(parts)
+
     if parts['command'] == 'goto':
         return goto_helper(parts)
 
@@ -72,6 +78,117 @@ def goto_helper(parts):
         '@{}'.format(parts['segment']),
         '0;JMP',
     ]
+
+
+def function_helper(parts):
+    i = parts['i']
+    string = ['push constant 0' for _ in range(int(i))]
+    return [
+        '({})'.format(parts['segment']),
+        # // LCL -> SP
+        # '@SP',
+        # 'D=M',
+        # '@LCL',
+        # 'M=D',
+    ] + [
+        # push contanst 0 i times
+        # TODO: THIS IS probably wrong
+        x for s in string for x in parser(s)
+    ]
+# + [
+#         # update sp to LCL + i
+#         '@{}'.format(i),
+#         'D=A',
+#         '@SP',
+#         'M=M+D',
+#     ]
+
+
+def return_helper(parts):
+    text = get_text()
+    return [
+        # FRAME = LCL
+        '@LCL',
+        'D=M',
+        '@FRAME{}'.format(text),
+        'M=D',
+
+        # RET = *(FRAME-5)
+        '@5',
+        'D=A',
+
+        '@FRAME{}'.format(text),
+        # frame -5
+        'D=M-D',
+        'A=D',
+        # *(FRAME-5)
+        'D=M',
+        # RET = *(FRAME-5)
+        '@RET{}'.format(text),
+        'M=D',
+
+        # *ARG = pop()
+        '@SP',
+        'A=M',
+        'D=M',
+        '@ARG',
+        'A=M',
+        'M=D',
+
+        # SP = ARG +1
+        '@ARG',
+        'D=M',
+        '@SP',
+        'M=D+1',
+
+        # THAT = *(FRAME-1)
+        '@FRAME{}'.format(text),
+        'A=M-1',
+        'D=M',
+        '@THAT',
+        'M=D',
+
+        # THIS = *(FRAME-2)
+        '@FRAME{}'.format(text),
+        'D=M',
+        '@2',
+        'D=D-A',
+        'A=D',
+        # store the value of *(FRAME-2) to D
+        'D=M',
+        # assign D to @THIS
+        '@THIS',
+        'M=D',
+
+        # ARG = *(FRAME-3)
+        '@FRAME{}'.format(text),
+        'D=M',
+        '@3',
+        'D=D-A',
+        'A=D',
+        # store the value of (FRAME-3) to D
+        'D=M',
+        # assign D to @ARG
+        '@ARG',
+        'M=D',
+
+        # LCL = *(FRAME-4)
+        '@FRAME{}'.format(text),
+        'D=M',
+        '@4',
+        'D=D-A',
+        'A=D',
+        # store the value of (FRAME-3) to D
+        'D=M',
+        # assign D to @ARG
+        '@LCL',
+        'M=D',
+
+        # GOTO RET
+        '@RET{}'.format(text),
+        '0;JMP',
+    ]
+
 
 
 def label_helper(parts):
@@ -757,7 +874,21 @@ xs = [
 ]
 
 
+xs = [
+    'function SimpleFunction.test 2',
+    'push local 0',
+    'push local 1',
+    'add',
+    'not',
+    'push argument 0',
+    'add',
+    'push argument 1',
+    'sub',
+    'return',
+]
+
+
 for x in xs:
     ret = parser(x)
-    print '// ' + x
+    # print '// ' + x
     print '\n'.join(ret)
