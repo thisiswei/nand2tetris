@@ -105,6 +105,7 @@ def function_helper(parts):
 
 
 def return_helper(parts):
+    # !this is probably wrong
     text = get_text()
     return [
         # FRAME = LCL
@@ -890,5 +891,5 @@ xs = [
 
 for x in xs:
     ret = parser(x)
-    # print '// ' + x
+    print '// ' + x
     print '\n'.join(ret)
