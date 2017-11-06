@@ -130,7 +130,7 @@ def return_helper(parts):
 
         # *ARG = pop()
         '@SP',
-        'A=M',
+        'A=M-1',
         'D=M',
         '@ARG',
         'A=M',
@@ -187,6 +187,7 @@ def return_helper(parts):
 
         # GOTO RET
         '@RET{}'.format(text),
+        'A=M',
         '0;JMP',
     ]
 
