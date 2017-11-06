@@ -1,0 +1,171 @@
+// function SimpleFunction.test 2
+(SimpleFunction.test)
+@0
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@0
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// push local 0
+@LCL
+D=M
+@0
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// push local 1
+@LCL
+D=M
+@1
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M+D
+@SP
+M=M+1
+// not
+@SP
+M=M-1
+A=M
+D=M
+@Falseca4bf620
+D ; JEQ
+@SP
+A=M
+M=0
+@ENDca4bf620
+0 ; JEQ
+(Falseca4bf620)
+ @SP
+ A=M
+ M=1
+(ENDca4bf620)
+ @SP
+ M=M+1
+// push argument 0
+@ARG
+D=M
+@0
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// add
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M+D
+@SP
+M=M+1
+// push argument 1
+@ARG
+D=M
+@1
+D=D+A
+A=D
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// sub
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+M=M-D
+@SP
+M=M+1
+// return
+@LCL
+D=M
+@FRAME35c917cb
+M=D
+@5
+D=A
+@FRAME35c917cb
+D=M-D
+A=D
+D=M
+@RET35c917cb
+M=D
+@SP
+A=M-1
+D=M
+@ARG
+A=M
+M=D
+@ARG
+D=M
+@SP
+M=D+1
+@FRAME35c917cb
+A=M-1
+D=M
+@THAT
+M=D
+@FRAME35c917cb
+D=M
+@2
+D=D-A
+A=D
+D=M
+@THIS
+M=D
+@FRAME35c917cb
+D=M
+@3
+D=D-A
+A=D
+D=M
+@ARG
+M=D
+@FRAME35c917cb
+D=M
+@4
+D=D-A
+A=D
+D=M
+@LCL
+M=D
+@RET35c917cb
+A=M
+0;JMP
