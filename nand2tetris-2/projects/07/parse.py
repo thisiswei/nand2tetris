@@ -33,6 +33,9 @@ def parser_helper(string):
 
 def parser(string):
     parts = parser_helper(string)
+    if parts['command'] == 'call':
+        return call_helper(parts)
+
     if parts['command'] == 'if-goto':
         return if_go_helper(parts)
 
@@ -77,6 +80,85 @@ def goto_helper(parts):
     return [
         '@{}'.format(parts['segment']),
         '0;JMP',
+    ]
+
+
+def call_helper(parts):
+    '''
+    call f n
+       push return-address
+       push LCL
+       push ARG
+       push THIS
+       push THAT
+       ARG = SP-n-5
+       LCL = SP
+       goto f
+    (return-address)
+    '''
+    n = parts['i']
+    text = get_text()
+    return [
+        # push return-address
+        '@return-address{}'.format(text),
+        'A=M',
+        'D=M',
+        '@SP',
+        'A=M',
+        'M=D',
+        '@SP',
+        'M=M+1',
+        # push LCL
+        '@LCL',
+        'D=M',
+        '@SP',
+        'A=M',
+        'M=D',
+        '@SP',
+        'M=M+1',
+        # push ARG
+        '@ARG',
+        'D=M',
+        '@SP',
+        'A=M',
+        'M=D',
+        '@SP',
+        'M=M+1',
+        # push THIS
+        '@THIS',
+        'D=M',
+        '@SP',
+        'A=M',
+        'M=D',
+        '@SP',
+        'M=M+1',
+        # push THAT
+        '@THAT',
+        'D=M',
+        '@SP',
+        'A=M',
+        'M=D',
+        '@SP',
+        'M=M+1',
+        # ARG = SP-n-5
+        '@{}'.format(n),
+        'D=A',
+        '@5',
+        'D=D+A',
+        '@SP',
+        'D=M-D',
+        '@ARG',
+        'M=D',
+        # LCL = SP
+        '@SP',
+        'D=M',
+        '@LCL',
+        'M=D',
+        # goto f
+        # TODO: THIS is probably wrong, always jumps back to position 263
+        '@{}'.format(parts['segment']),
+        '0;JMP',
+        '(return-address{})'.format(text),
     ]
 
 
@@ -886,6 +968,26 @@ xs = [
     'add',
     'push argument 1',
     'sub',
+    'return',
+]
+
+
+xs = [
+    'function Sys.init 0',
+    'call Sys.main 0',
+    'pop temp 1',
+    'label LOOP',
+    'goto LOOP',
+    'function Sys.main 0',
+    'push constant 123',
+    'call Sys.add12 1',
+    'pop temp 0',
+    'push constant 246',
+    'return',
+    'function Sys.add12 3',
+    'push argument 0',
+    'push constant 12',
+    'add',
     'return',
 ]
 
