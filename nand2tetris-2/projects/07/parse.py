@@ -101,8 +101,7 @@ def call_helper(parts):
     return [
         # push return-address
         '@return-address{}'.format(text),
-        'A=M',
-        'D=M',
+        'D=A',
         '@SP',
         'A=M',
         'M=D',
