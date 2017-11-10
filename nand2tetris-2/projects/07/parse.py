@@ -311,11 +311,11 @@ def pop_helper(parts):
             'M=D',
         ]
 
-    if segment == 'static':
+    if segment == 'STATIC':
         return [
             '@SP',
             'M=M-1',
-            'A=M'
+            'A=M',
             'D=M',
             '@StaticTest.{}'.format(i),
             'M=D',
@@ -403,7 +403,7 @@ def push_other_helper(parts):
             'M=M+1',
         ]
 
-    if segment == 'static':
+    if segment == 'STATIC':
         return [
             '@StaticTest.{}'.format(i),
             'D=M',
