@@ -991,6 +991,79 @@ xs = [
 ]
 
 
+xs = [
+    'function Sys.init 0',
+    'push constant 4',
+    'call Main.fibonacci 1',
+    'label WHILE',
+    'goto WHILE',
+    'function Main.fibonacci 0',
+    'push argument 0',
+    'push constant 2',
+    'lt',
+    'if-goto IF_TRUE',
+    'goto IF_FALSE',
+    'label IF_TRUE',
+    'push argument 0',
+    'return',
+    'label IF_FALSE',
+    'push argument 0',
+    'push constant 2',
+    'sub',
+    'call Main.fibonacci 1',
+    'push argument 0',
+    'push constant 1',
+    'sub',
+    'call Main.fibonacci 1',
+    'add',
+    'return',
+]
+
+xs = [
+    'function Sys.init 0',
+    'push constant 6',
+    'push constant 8',
+    'call Class1.set 2',
+    'pop temp 0',
+    'push constant 23',
+    'push constant 15',
+    'call Class2.set 2',
+    'pop temp 0',
+    'call Class1.get 0',
+    'call Class2.get 0',
+    'label WHILE',
+    'goto WHILE',
+
+    'function Class1.set 0',
+    'push argument 0',
+    'pop static 0',
+    'push argument 1',
+    'pop static 1',
+    'push constant 0',
+    'return',
+
+    'function Class1.get 0',
+    'push static 0',
+    'push static 1',
+    'sub',
+    'return',
+
+    'function Class2.set 0',
+    'push argument 0',
+    'pop static 0',
+    'push argument 1',
+    'pop static 1',
+    'push constant 0',
+    'return',
+
+    'function Class2.get 0',
+    'push static 0',
+    'push static 1',
+    'sub',
+    'return',
+]
+
+
 for x in xs:
     ret = parser(x)
     print '// ' + x
